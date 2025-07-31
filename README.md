@@ -2,6 +2,8 @@
 
 A comprehensive, feature-rich Todo List web application built with Next.js, React, TypeScript, and Tailwind CSS. This application provides a complete task and event management solution with advanced features like calendar views, filtering, notifications, and more.
 
+🔧 **Latest Update**: Fixed MongoDB connection issues for deployment compatibility.
+
 ## 🚀 Features
 
 ### Core Functionality
