@@ -66,10 +66,11 @@ export default function AddItemModal({
         setDueTime(editingItem.dueTime || '');
       } else {
         // Event
-        setStartDate(editingItem.startDate.toISOString().split('T')[0]);
-        setStartTime(editingItem.startTime || '');
-        setEndDate(editingItem.endDate.toISOString().split('T')[0]);
-        setEndTime(editingItem.endTime || '');
+        const eventItem = editingItem as Event;
+        setStartDate(eventItem.startDate.toISOString().split('T')[0]);
+        setStartTime(eventItem.startTime || '');
+        setEndDate(eventItem.endDate.toISOString().split('T')[0]);
+        setEndTime(eventItem.endTime || '');
       }
     } else {
       // Reset form for new item

@@ -108,7 +108,7 @@ export default function Home() {
 
   const handleUpdateEvent = (updatedEvent: Event) => {
     updateEvent(updatedEvent);
-    setEvents(prev => prev.map(event => event.id === updatedEvent.id ? event : updatedEvent));
+    setEvents(prev => prev.map(event => event.id === updatedEvent.id ? updatedEvent : event));
     setEditingItem(null);
   };
 

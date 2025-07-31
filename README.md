@@ -66,7 +66,6 @@ A comprehensive, feature-rich Todo List web application built with Next.js, Reac
    ```bash
    npm install
    ```
-
 3. **Run the development server**
    ```bash
    npm run dev
