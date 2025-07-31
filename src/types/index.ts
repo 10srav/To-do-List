@@ -79,3 +79,32 @@ export interface Notification {
   isRead: boolean;
   relatedItemId?: string;
 }
+
+export interface Message {
+  id: string;
+  from: string;
+  to: string[];
+  cc?: string[];
+  bcc?: string[];
+  subject: string;
+  body: string;
+  isHtml: boolean;
+  priority: 'low' | 'normal' | 'high';
+  status: 'draft' | 'sent' | 'archived' | 'deleted';
+  isRead: boolean;
+  isStarred: boolean;
+  isImportant: boolean;
+  labels: string[];
+  attachments: {
+    filename: string;
+    size: number;
+    type: string;
+    url?: string;
+  }[];
+  relatedTaskId?: string;
+  relatedEventId?: string;
+  threadId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  sentAt?: Date;
+}

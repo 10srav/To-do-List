@@ -1,4 +1,5 @@
 import { Task, Event, Comment, Notification } from '@/types';
+import { taskAPI, eventAPI } from './api';
 
 const STORAGE_KEYS = {
   TASKS: 'todo-tasks',
@@ -6,6 +7,9 @@ const STORAGE_KEYS = {
   NOTIFICATIONS: 'todo-notifications',
   SETTINGS: 'todo-settings',
 } as const;
+
+// Check if we should use API (when MongoDB is connected) or localStorage
+const USE_API = process.env.NEXT_PUBLIC_USE_API === 'true' || false;
 
 // Generic storage functions
 const getFromStorage = <T>(key: string): T[] => {

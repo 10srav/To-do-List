@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 
 interface HeaderProps {
   onAddClick: () => void;
-  view: 'list' | 'calendar';
+  view: 'list' | 'calendar' | 'messages' | 'profile';
   calendarView: CalendarView;
 }
 
@@ -24,6 +24,10 @@ export default function Header({ onAddClick, view, calendarView }: HeaderProps) 
       } else {
         return format(currentDate, 'MMMM dd, yyyy');
       }
+    } else if (view === 'messages') {
+      return 'Messages';
+    } else if (view === 'profile') {
+      return 'Profile';
     }
     return 'My Tasks & Events';
   };
@@ -36,12 +40,12 @@ export default function Header({ onAddClick, view, calendarView }: HeaderProps) 
             {getViewTitle()}
           </h1>
           
-          {view === 'list' && (
+          {(view === 'list' || view === 'messages') && (
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search tasks and events..."
+                placeholder={view === 'messages' ? "Search messages..." : "Search tasks and events..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent w-80"

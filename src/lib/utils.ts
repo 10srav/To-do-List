@@ -155,8 +155,8 @@ export const filterEvents = (events: Event[], filters: FilterOptions): Event[] =
 // Sorting utilities
 export const sortByDate = <T extends TodoItem>(items: T[]): T[] => {
   return items.sort((a, b) => {
-    const dateA = 'dueDate' in a ? a.dueDate : a.startDate;
-    const dateB = 'dueDate' in b ? b.dueDate : b.startDate;
+    const dateA = 'dueDate' in a ? a.dueDate : (a as Event).startDate;
+    const dateB = 'dueDate' in b ? b.dueDate : (b as Event).startDate;
     
     if (!dateA && !dateB) return 0;
     if (!dateA) return 1;

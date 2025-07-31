@@ -12,8 +12,14 @@ import Calendar from '@/components/Calendar';
 import AddItemModal from '@/components/AddItemModal';
 import FilterPanel from '@/components/FilterPanel';
 import NotificationPanel from '@/components/NotificationPanel';
+import Messages from '@/components/Messages';
+import AuthModal from '@/components/AuthModal';
+import UserProfile from '@/components/UserProfile';
+import LandingPage from '@/components/LandingPage';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
+  const { user, loading: authLoading, login, logout, updateUser } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
@@ -23,8 +29,9 @@ export default function Home() {
     type: 'month',
     currentDate: new Date(),
   });
-  const [view, setView] = useState<'list' | 'calendar'>('list');
+  const [view, setView] = useState<'list' | 'calendar' | 'messages' | 'profile'>('list');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [editingItem, setEditingItem] = useState<Task | Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -170,11 +177,26 @@ export default function Home() {
     }
   };
 
-  if (isLoading) {
+  // Show loading spinner while checking authentication
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
+    );
+  }
+
+  // Show landing page if user is not authenticated
+  if (!user) {
+    return (
+      <>
+        <LandingPage onGetStarted={() => setShowAuthModal(true)} />
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={login}
+        />
+      </>
     );
   }
 
@@ -185,6 +207,7 @@ export default function Home() {
         setView={setView}
         calendarView={calendarView}
         setCalendarView={setCalendarView}
+        user={user}
       />
       
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -227,7 +250,7 @@ export default function Home() {
                   />
                 </div>
               </>
-            ) : (
+            ) : view === 'calendar' ? (
               <Calendar
                 tasks={tasks}
                 events={events}
@@ -237,10 +260,20 @@ export default function Home() {
                 onDeleteTask={handleDeleteTask}
                 onDeleteEvent={handleDeleteEvent}
               />
+            ) : view === 'messages' ? (
+              <Messages />
+            ) : (
+              <div className="flex-1 overflow-y-auto p-6">
+                <UserProfile
+                  user={user}
+                  onUpdate={updateUser}
+                  onLogout={logout}
+                />
+              </div>
             )}
           </div>
           
-          <NotificationPanel tasks={tasks} events={events} />
+          {view !== 'messages' && view !== 'profile' && <NotificationPanel tasks={tasks} events={events} />}
         </div>
       </div>
 
