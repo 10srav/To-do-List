@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: tasksaver-app
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_USE_API
+        value: true
+      - key: DEBUG_DB_CONNECTION
+        value: true
+      - key: MONGODB_URI
+        sync: false  # Set this in Render dashboard
+      - key: NEXTAUTH_SECRET
+        sync: false  # Set this in Render dashboard
+      - key: NEXTAUTH_URL
+        sync: false  # Set this in Render dashboard
+    autoDeploy: true
+    branch: main

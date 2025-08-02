@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:production": "NODE_ENV=production next build",
+    "start:production": "NODE_ENV=production next start",
+    "health-check": "curl -f http://localhost:3000/api/health || exit 1",
+    "test:api": "node test-api.js"
   },
   "keywords": [],
   "author": "",

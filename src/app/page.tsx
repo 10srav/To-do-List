@@ -37,16 +37,47 @@ export default function Home() {
 
   // Load data on component mount
   useEffect(() => {
-    const loadData = () => {
-      const loadedTasks = getTasks();
-      const loadedEvents = getEvents();
-      setTasks(loadedTasks);
-      setEvents(loadedEvents);
-      setIsLoading(false);
+    const loadData = async () => {
+      try {
+        console.log('🔄 Loading application data...');
+        
+        // Load tasks and events (now async)
+        const [loadedTasks, loadedEvents] = await Promise.all([
+          getTasks(),
+          getEvents()
+        ]);
+        
+        console.log(`✅ Loaded ${loadedTasks.length} tasks and ${loadedEvents.length} events`);
+        
+        setTasks(loadedTasks);
+        setEvents(loadedEvents);
+      } catch (error) {
+        console.error('❌ Failed to load data:', error);
+        // In case of error, try to load from localStorage as fallback
+        try {
+          const fallbackTasks = JSON.parse(localStorage.getItem('todo-tasks') || '[]');
+          const fallbackEvents = JSON.parse(localStorage.getItem('todo-events') || '[]');
+          setTasks(fallbackTasks);
+          setEvents(fallbackEvents);
+          console.log('📦 Loaded data from localStorage fallback');
+        } catch (fallbackError) {
+          console.error('❌ Fallback also failed:', fallbackError);
+          // Set empty arrays as last resort
+          setTasks([]);
+          setEvents([]);
+        }
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    loadData();
-  }, []);
+    // Only load data if user is authenticated
+    if (user) {
+      loadData();
+    } else {
+      setIsLoading(false);
+    }
+  }, [user]);
 
   // Apply filters when tasks, events, or filters change
   useEffect(() => {
@@ -57,28 +88,36 @@ export default function Home() {
     setFilteredEvents(sortByDate(filteredEventsData));
   }, [tasks, events, filters]);
 
-  const handleAddTask = (taskData: Partial<Task>) => {
-    const newTask: Task = {
-      id: generateId(),
-      title: taskData.title || '',
-      description: taskData.description || '',
-      dueDate: taskData.dueDate,
-      dueTime: taskData.dueTime,
-      tags: taskData.tags || [],
-      priority: taskData.priority || 'medium',
-      status: 'pending',
-      isRecurring: taskData.isRecurring || false,
-      recurrence: taskData.recurrence,
-      isStarred: false,
-      isLiked: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      comments: [],
-    };
+  const handleAddTask = async (taskData: Partial<Task>) => {
+    try {
+      const newTask: Task = {
+        id: generateId(),
+        title: taskData.title || '',
+        description: taskData.description || '',
+        dueDate: taskData.dueDate,
+        dueTime: taskData.dueTime,
+        tags: taskData.tags || [],
+        priority: taskData.priority || 'medium',
+        status: 'pending',
+        isRecurring: taskData.isRecurring || false,
+        recurrence: taskData.recurrence,
+        isStarred: false,
+        isLiked: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        comments: [],
+      };
 
-    addTask(newTask);
-    setTasks(prev => [...prev, newTask]);
-    setShowAddModal(false);
+      console.log('🔄 Adding new task...');
+      const savedTask = await addTask(newTask);
+      setTasks(prev => [...prev, savedTask]);
+      setShowAddModal(false);
+      console.log('✅ Task added successfully');
+    } catch (error) {
+      console.error('❌ Failed to add task:', error);
+      // You might want to show an error message to the user here
+      alert('Failed to add task. Please try again.');
+    }
   };
 
   const handleAddEvent = (eventData: Partial<Event>) => {

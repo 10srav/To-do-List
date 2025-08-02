@@ -7,6 +7,7 @@ import {
   XMarkIcon,
   PaperClipIcon
 } from '@heroicons/react/24/outline';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MessageComposeProps {
   onClose: () => void;
@@ -19,6 +20,7 @@ interface MessageComposeProps {
 }
 
 export default function MessageCompose({ onClose, onSent, replyTo }: MessageComposeProps) {
+  const { user } = useAuth();
   const [to, setTo] = useState(replyTo?.from || '');
   const [cc, setCc] = useState('');
   const [bcc, setBcc] = useState('');
@@ -52,11 +54,16 @@ export default function MessageCompose({ onClose, onSent, replyTo }: MessageComp
 
   const saveDraft = async () => {
     if (!subject.trim() && !body.trim()) return;
+    if (!user) {
+      console.error('User not authenticated');
+      return;
+    }
 
     try {
       setSavingDraft(true);
       const messageData = {
-        from: 'user@example.com', // This would come from user session
+        userId: user.id,
+        from: user.email,
         to: to.split(',').map(email => email.trim()).filter(email => email),
         cc: cc.split(',').map(email => email.trim()).filter(email => email),
         bcc: bcc.split(',').map(email => email.trim()).filter(email => email),
@@ -97,11 +104,16 @@ export default function MessageCompose({ onClose, onSent, replyTo }: MessageComp
       alert('Please fill in the recipient and subject fields');
       return;
     }
+    if (!user) {
+      alert('User not authenticated');
+      return;
+    }
 
     try {
       setSending(true);
       const messageData = {
-        from: 'user@example.com', // This would come from user session
+        userId: user.id,
+        from: user.email,
         to: to.split(',').map(email => email.trim()).filter(email => email),
         cc: cc.split(',').map(email => email.trim()).filter(email => email),
         bcc: bcc.split(',').map(email => email.trim()).filter(email => email),

@@ -9,9 +9,13 @@ const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔄 POST /api/auth/login - Login attempt');
+    
     await connectDB();
+    console.log('✅ Database connected for login');
     
     const { email, password } = await request.json();
+    console.log(`📧 Login attempt for email: ${email}`);
 
     // Validation
     if (!email || !password) {
@@ -68,15 +72,28 @@ export async function POST(request: NextRequest) {
     // Set HTTP-only cookie
     response.cookies.set('auth-token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production' ? true : false,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 // 7 days
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost'
     });
 
+    console.log('✅ Login successful for user:', email);
     return response;
 
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Login error:', error);
+    
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('ENOTFOUND') || error.message.includes('timeout')) {
+        return NextResponse.json(
+          { success: false, error: 'Database connection failed. Please try again later.' },
+          { status: 503 }
+        );
+      }
+    }
+    
     return NextResponse.json(
       { success: false, error: 'Login failed. Please try again.' },
       { status: 500 }

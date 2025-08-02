@@ -1,26 +1,75 @@
 // API utility functions for frontend-backend communication
 
-const API_BASE_URL = '/api';
+// Determine the API base URL based on environment
+const getApiBaseUrl = () => {
+  // In production, use the deployed URL if specified, otherwise use relative paths
+  if (typeof window !== 'undefined') {
+    // Client-side: use relative paths for same-origin requests
+    return '/api';
+  } else {
+    // Server-side: use the full URL if available
+    return process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api` : '/api';
+  }
+};
 
-// Generic API request function
+const API_BASE_URL = getApiBaseUrl();
+
+// Generic API request function with enhanced error handling
 async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<{ success: boolean; data?: T; error?: string }> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    console.log(`🔄 API Request: ${options.method || 'GET'} ${url}`);
+    
+    const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
       },
+      credentials: 'include', // Include cookies for authentication
       ...options,
     });
 
+    // Log response status for debugging
+    console.log(`📡 API Response: ${response.status} ${response.statusText}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ API Error ${response.status}:`, errorText);
+      
+      // Try to parse as JSON, fallback to text
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: errorText || `HTTP ${response.status}` };
+      }
+      
+      return { 
+        success: false, 
+        error: errorData.error || `Request failed with status ${response.status}` 
+      };
+    }
+
     const data = await response.json();
+    console.log(`✅ API Success:`, data.success ? 'OK' : 'Failed');
     return data;
+    
   } catch (error) {
-    console.error(`API request failed for ${endpoint}:`, error);
-    return { success: false, error: 'Network error' };
+    console.error(`❌ API request failed for ${endpoint}:`, error);
+    
+    // Provide more specific error messages
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return { success: false, error: 'Network connection failed. Please check your internet connection.' };
+    }
+    
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Network error' 
+    };
   }
 }
 

@@ -11,6 +11,30 @@ const STORAGE_KEYS = {
 // Check if we should use API (when MongoDB is connected) or localStorage
 const USE_API = process.env.NEXT_PUBLIC_USE_API === 'true' || false;
 
+// Helper function to determine if we should use API
+const shouldUseAPI = (): boolean => {
+  // Always use API in production if configured
+  if (process.env.NODE_ENV === 'production' && USE_API) {
+    return true;
+  }
+  
+  // In development, use API if explicitly enabled
+  return USE_API;
+};
+
+// Enhanced error handling for API operations
+const handleStorageError = (operation: string, error: unknown) => {
+  console.error(`❌ Storage error in ${operation}:`, error);
+  
+  // If API fails, we could fallback to localStorage in development
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('⚠️ API failed, falling back to localStorage');
+    return false; // Indicates fallback needed
+  }
+  
+  throw error; // Re-throw in production
+};
+
 // Generic storage functions
 const getFromStorage = <T>(key: string): T[] => {
   if (typeof window === 'undefined') return [];
@@ -32,8 +56,46 @@ const saveToStorage = <T>(key: string, data: T[]): void => {
   }
 };
 
-// Task storage functions
-export const getTasks = (): Task[] => {
+// Task storage functions with API integration
+export const getTasks = async (): Promise<Task[]> => {
+  if (shouldUseAPI()) {
+    try {
+      console.log('🔄 Fetching tasks from API...');
+      const response = await taskAPI.getAll();
+      
+      if (response.success && response.data) {
+        console.log(`✅ Fetched ${response.data.length} tasks from API`);
+        return response.data.map((task: any) => ({
+          ...task,
+          id: task._id || task.id,
+          dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+          createdAt: new Date(task.createdAt),
+          updatedAt: new Date(task.updatedAt),
+          comments: task.comments?.map((comment: any) => ({
+            ...comment,
+            createdAt: new Date(comment.createdAt),
+            updatedAt: new Date(comment.updatedAt),
+          })) || [],
+        }));
+      } else {
+        console.error('❌ Failed to fetch tasks from API:', response.error);
+        throw new Error(response.error || 'Failed to fetch tasks');
+      }
+    } catch (error) {
+      if (handleStorageError('getTasks', error) === false) {
+        // Fallback to localStorage in development
+        console.log('📦 Using localStorage fallback');
+        return getTasksFromStorage();
+      }
+      throw error;
+    }
+  }
+  
+  return getTasksFromStorage();
+};
+
+// Separate function for localStorage operations
+const getTasksFromStorage = (): Task[] => {
   const tasks = getFromStorage<Task>(STORAGE_KEYS.TASKS);
   return tasks.map(task => ({
     ...task,
@@ -52,10 +114,43 @@ export const saveTasks = (tasks: Task[]): void => {
   saveToStorage(STORAGE_KEYS.TASKS, tasks);
 };
 
-export const addTask = (task: Task): void => {
-  const tasks = getTasks();
+export const addTask = async (task: Task): Promise<Task> => {
+  if (shouldUseAPI()) {
+    try {
+      console.log('🔄 Creating task via API...');
+      const response = await taskAPI.create(task);
+      
+      if (response.success && response.data) {
+        console.log('✅ Task created via API');
+        return {
+          ...response.data,
+          id: response.data._id || response.data.id,
+          dueDate: response.data.dueDate ? new Date(response.data.dueDate) : undefined,
+          createdAt: new Date(response.data.createdAt),
+          updatedAt: new Date(response.data.updatedAt),
+        };
+      } else {
+        console.error('❌ Failed to create task via API:', response.error);
+        throw new Error(response.error || 'Failed to create task');
+      }
+    } catch (error) {
+      if (handleStorageError('addTask', error) === false) {
+        // Fallback to localStorage in development
+        console.log('📦 Using localStorage fallback');
+        const tasks = getTasksFromStorage();
+        tasks.push(task);
+        saveTasks(tasks);
+        return task;
+      }
+      throw error;
+    }
+  }
+  
+  // localStorage implementation
+  const tasks = getTasksFromStorage();
   tasks.push(task);
   saveTasks(tasks);
+  return task;
 };
 
 export const updateTask = (updatedTask: Task): void => {
@@ -73,8 +168,47 @@ export const deleteTask = (taskId: string): void => {
   saveTasks(filteredTasks);
 };
 
-// Event storage functions
-export const getEvents = (): Event[] => {
+// Event storage functions with API integration
+export const getEvents = async (): Promise<Event[]> => {
+  if (shouldUseAPI()) {
+    try {
+      console.log('🔄 Fetching events from API...');
+      const response = await eventAPI.getAll();
+      
+      if (response.success && response.data) {
+        console.log(`✅ Fetched ${response.data.length} events from API`);
+        return response.data.map((event: any) => ({
+          ...event,
+          id: event._id || event.id,
+          startDate: new Date(event.startDate),
+          endDate: new Date(event.endDate),
+          createdAt: new Date(event.createdAt),
+          updatedAt: new Date(event.updatedAt),
+          comments: event.comments?.map((comment: any) => ({
+            ...comment,
+            createdAt: new Date(comment.createdAt),
+            updatedAt: new Date(comment.updatedAt),
+          })) || [],
+        }));
+      } else {
+        console.error('❌ Failed to fetch events from API:', response.error);
+        throw new Error(response.error || 'Failed to fetch events');
+      }
+    } catch (error) {
+      if (handleStorageError('getEvents', error) === false) {
+        // Fallback to localStorage in development
+        console.log('📦 Using localStorage fallback');
+        return getEventsFromStorage();
+      }
+      throw error;
+    }
+  }
+  
+  return getEventsFromStorage();
+};
+
+// Separate function for localStorage operations
+const getEventsFromStorage = (): Event[] => {
   const events = getFromStorage<Event>(STORAGE_KEYS.EVENTS);
   return events.map(event => ({
     ...event,

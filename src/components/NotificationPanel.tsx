@@ -27,6 +27,8 @@ export default function NotificationPanel({ tasks, events }: NotificationPanelPr
     setOverdueItems({ tasks: overdueTasks, events: overdueEvents });
     setUpcomingItems({ tasks: upcomingTasks, events: upcomingEvents });
   }, [tasks, events]);
+  // Calculate total notifications
+  
 
   const totalNotifications = overdueItems.tasks.length + overdueItems.events.length + 
                            upcomingItems.tasks.length + upcomingItems.events.length;
