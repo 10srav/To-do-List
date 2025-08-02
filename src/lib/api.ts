@@ -75,20 +75,20 @@ async function apiRequest<T>(
 
 // Task API functions
 export const taskAPI = {
-  getAll: () => apiRequest('/tasks'),
-  getById: (id: string) => apiRequest(`/tasks/${id}`),
-  create: (task: any) => apiRequest('/tasks', { method: 'POST', body: JSON.stringify(task) }),
-  update: (id: string, task: any) => apiRequest(`/tasks/${id}`, { method: 'PUT', body: JSON.stringify(task) }),
-  delete: (id: string) => apiRequest(`/tasks/${id}`, { method: 'DELETE' }),
+  getAll: () => apiRequest<any[]>('/tasks'),
+  getById: (id: string) => apiRequest<any>(`/tasks/${id}`),
+  create: (task: any) => apiRequest<any>('/tasks', { method: 'POST', body: JSON.stringify(task) }),
+  update: (id: string, task: any) => apiRequest<any>(`/tasks/${id}`, { method: 'PUT', body: JSON.stringify(task) }),
+  delete: (id: string) => apiRequest<any>(`/tasks/${id}`, { method: 'DELETE' }),
 };
 
 // Event API functions
 export const eventAPI = {
-  getAll: () => apiRequest('/events'),
-  getById: (id: string) => apiRequest(`/events/${id}`),
-  create: (event: any) => apiRequest('/events', { method: 'POST', body: JSON.stringify(event) }),
-  update: (id: string, event: any) => apiRequest(`/events/${id}`, { method: 'PUT', body: JSON.stringify(event) }),
-  delete: (id: string) => apiRequest(`/events/${id}`, { method: 'DELETE' }),
+  getAll: () => apiRequest<any[]>('/events'),
+  getById: (id: string) => apiRequest<any>(`/events/${id}`),
+  create: (event: any) => apiRequest<any>('/events', { method: 'POST', body: JSON.stringify(event) }),
+  update: (id: string, event: any) => apiRequest<any>(`/events/${id}`, { method: 'PUT', body: JSON.stringify(event) }),
+  delete: (id: string) => apiRequest<any>(`/events/${id}`, { method: 'DELETE' }),
 };
 
 // Message API functions

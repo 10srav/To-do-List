@@ -203,7 +203,7 @@ export default function Calendar({
     const { tasks: dayTasks, events: dayEvents } = getItemsForDate(day);
 
     // Create time slots from 6 AM to 10 PM
-    const timeSlots = [];
+    const timeSlots: number[] = [];
     for (let hour = 6; hour <= 22; hour++) {
       timeSlots.push(hour);
     }

@@ -120,52 +120,83 @@ export default function Home() {
     }
   };
 
-  const handleAddEvent = (eventData: Partial<Event>) => {
-    const newEvent: Event = {
-      id: generateId(),
-      title: eventData.title || '',
-      description: eventData.description || '',
-      startDate: eventData.startDate || new Date(),
-      endDate: eventData.endDate || new Date(),
-      startTime: eventData.startTime,
-      endTime: eventData.endTime,
-      tags: eventData.tags || [],
-      priority: eventData.priority || 'medium',
-      status: 'upcoming',
-      isRecurring: eventData.isRecurring || false,
-      recurrence: eventData.recurrence,
-      isStarred: false,
-      isLiked: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      comments: [],
-    };
+  const handleAddEvent = async (eventData: Partial<Event>) => {
+    try {
+      const newEvent: Event = {
+        id: generateId(),
+        title: eventData.title || '',
+        description: eventData.description || '',
+        startDate: eventData.startDate || new Date(),
+        endDate: eventData.endDate || new Date(),
+        startTime: eventData.startTime,
+        endTime: eventData.endTime,
+        tags: eventData.tags || [],
+        priority: eventData.priority || 'medium',
+        status: 'upcoming',
+        isRecurring: eventData.isRecurring || false,
+        recurrence: eventData.recurrence,
+        isStarred: false,
+        isLiked: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        comments: [],
+      };
 
-    addEvent(newEvent);
-    setEvents(prev => [...prev, newEvent]);
-    setShowAddModal(false);
+      console.log('🔄 Adding new event...');
+      const savedEvent = await addEvent(newEvent);
+      setEvents(prev => [...prev, savedEvent]);
+      setShowAddModal(false);
+      console.log('✅ Event added successfully');
+    } catch (error) {
+      console.error('❌ Failed to add event:', error);
+      alert('Failed to add event. Please try again.');
+    }
   };
 
-  const handleUpdateTask = (updatedTask: Task) => {
-    updateTask(updatedTask);
-    setTasks(prev => prev.map(task => task.id === updatedTask.id ? updatedTask : task));
-    setEditingItem(null);
+  const handleUpdateTask = async (updatedTask: Task) => {
+    try {
+      await updateTask(updatedTask);
+      setTasks(prev => prev.map(task => task.id === updatedTask.id ? updatedTask : task));
+      setEditingItem(null);
+      console.log('✅ Task updated successfully');
+    } catch (error) {
+      console.error('❌ Failed to update task:', error);
+      alert('Failed to update task. Please try again.');
+    }
   };
 
-  const handleUpdateEvent = (updatedEvent: Event) => {
-    updateEvent(updatedEvent);
-    setEvents(prev => prev.map(event => event.id === updatedEvent.id ? updatedEvent : event));
-    setEditingItem(null);
+  const handleUpdateEvent = async (updatedEvent: Event) => {
+    try {
+      await updateEvent(updatedEvent);
+      setEvents(prev => prev.map(event => event.id === updatedEvent.id ? updatedEvent : event));
+      setEditingItem(null);
+      console.log('✅ Event updated successfully');
+    } catch (error) {
+      console.error('❌ Failed to update event:', error);
+      alert('Failed to update event. Please try again.');
+    }
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    deleteTask(taskId);
-    setTasks(prev => prev.filter(task => task.id !== taskId));
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await deleteTask(taskId);
+      setTasks(prev => prev.filter(task => task.id !== taskId));
+      console.log('✅ Task deleted successfully');
+    } catch (error) {
+      console.error('❌ Failed to delete task:', error);
+      alert('Failed to delete task. Please try again.');
+    }
   };
 
-  const handleDeleteEvent = (eventId: string) => {
-    deleteEvent(eventId);
-    setEvents(prev => prev.filter(event => event.id !== eventId));
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      await deleteEvent(eventId);
+      setEvents(prev => prev.filter(event => event.id !== eventId));
+      console.log('✅ Event deleted successfully');
+    } catch (error) {
+      console.error('❌ Failed to delete event:', error);
+      alert('Failed to delete event. Please try again.');
+    }
   };
 
   const handleToggleStar = (itemId: string, type: 'task' | 'event') => {

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     
     // Test database connection
     let dbStatus = 'disconnected';
-    let dbError = null;
+    let dbError: string | null = null;
     
     try {
       await connectDB();

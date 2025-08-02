@@ -18,9 +18,7 @@ const nextConfig = {
   },
   
   // Production optimizations
-  experimental: {
-    serverComponentsExternalPackages: ['mongoose'],
-  },
+  serverExternalPackages: ['mongoose'],
   
   // Environment variables validation
   env: {
