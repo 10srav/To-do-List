@@ -20,12 +20,14 @@ async function connectDB(): Promise<typeof mongoose> {
   const MONGODB_URI = process.env.MONGODB_URI;
   const isProduction = process.env.NODE_ENV === 'production';
   const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build';
+  const isVercel = !!process.env.VERCEL;
   const debugMode = process.env.DEBUG_DB_CONNECTION === 'true';
   
   if (debugMode) {
     console.log('🔍 MongoDB Connection Debug Info:');
     console.log('- NODE_ENV:', process.env.NODE_ENV);
     console.log('- NEXT_PHASE:', process.env.NEXT_PHASE);
+    console.log('- VERCEL:', isVercel);
     console.log('- MONGODB_URI exists:', !!MONGODB_URI);
     console.log('- MONGODB_URI preview:', MONGODB_URI ? `${MONGODB_URI.substring(0, 20)}...` : 'undefined');
   }
@@ -54,9 +56,10 @@ async function connectDB(): Promise<typeof mongoose> {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
+      maxPoolSize: isVercel ? 5 : 10, // Reduce pool size for Vercel
+      serverSelectionTimeoutMS: isVercel ? 10000 : 5000, // Increase timeout for Vercel
+      socketTimeoutMS: isVercel ? 60000 : 45000, // Increase socket timeout for Vercel
+      connectTimeoutMS: isVercel ? 10000 : 5000, // Add connection timeout for Vercel
       family: 4
     };
 

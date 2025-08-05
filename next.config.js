@@ -20,6 +20,11 @@ const nextConfig = {
   // Production optimizations
   serverExternalPackages: ['mongoose'],
   
+  // Vercel-specific optimizations
+  experimental: {
+    serverComponentsExternalPackages: ['mongoose'],
+  },
+  
   // Environment variables validation
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,

@@ -2,13 +2,22 @@
 
 // Determine the API base URL based on environment
 const getApiBaseUrl = () => {
-  // In production, use the deployed URL if specified, otherwise use relative paths
+  // For Vercel deployment, always use relative paths for same-origin requests
   if (typeof window !== 'undefined') {
     // Client-side: use relative paths for same-origin requests
     return '/api';
   } else {
-    // Server-side: use the full URL if available
-    return process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api` : '/api';
+    // Server-side: use relative paths for Vercel, full URL for external services
+    if (process.env.VERCEL_URL) {
+      // On Vercel, use the deployment URL
+      return `https://${process.env.VERCEL_URL}/api`;
+    } else if (process.env.NEXT_PUBLIC_API_URL) {
+      // Use custom API URL if specified
+      return `${process.env.NEXT_PUBLIC_API_URL}/api`;
+    } else {
+      // Fallback to relative paths
+      return '/api';
+    }
   }
 };
 

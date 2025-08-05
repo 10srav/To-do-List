@@ -8,9 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "build:production": "NODE_ENV=production next build",
+    "build:vercel": "NODE_ENV=production VERCEL=1 next build",
     "start:production": "NODE_ENV=production next start",
     "health-check": "curl -f http://localhost:3000/api/health || exit 1",
-    "test:api": "node test-api.js"
+    "test:api": "node test-api.js",
+    "vercel-build": "npm run build:vercel"
   },
   "keywords": [],
   "author": "",
