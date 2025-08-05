@@ -8,7 +8,17 @@ const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
 
 export async function POST(request: NextRequest) {
   try {
-    await connectDB();
+    console.log('🔄 Registration attempt started');
+    
+    // Connect to database with timeout
+    const dbConnection = await Promise.race([
+      connectDB(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database connection timeout')), 10000)
+      )
+    ]);
+    
+    console.log('✅ Database connected for registration');
     
     const { name, email, password } = await request.json();
 
@@ -89,7 +99,18 @@ export async function POST(request: NextRequest) {
     return response;
 
   } catch (error: any) {
-    console.error('Registration error:', error);
+    console.error('❌ Registration error:', error);
+    console.error('- Error name:', error.name);
+    console.error('- Error message:', error.message);
+    console.error('- Error stack:', error.stack);
+    
+    // Database connection errors
+    if (error.message.includes('timeout') || error.message.includes('ENOTFOUND')) {
+      return NextResponse.json(
+        { success: false, error: 'Database connection failed. Please try again later.' },
+        { status: 503 }
+      );
+    }
     
     if (error.code === 11000) {
       return NextResponse.json(

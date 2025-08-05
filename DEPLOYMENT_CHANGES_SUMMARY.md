@@ -72,7 +72,7 @@
 ```env
 # In your deployment platform, set:
 MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/YOUR_DATABASE?retryWrites=true&w=majority
-NEXTAUTH_URL=https://YOUR_APP_NAME.onrender.com
+NEXTAUTH_URL=https://To-do-List.onrender.com
 NEXTAUTH_SECRET=jezUUSpxEn0EkoPMfdzq60Pz+uf5Il/aqNXFjjsju70=
 NEXT_PUBLIC_USE_API=true
 NODE_ENV=production

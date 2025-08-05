@@ -10,15 +10,27 @@ async function getUserFromToken(request: NextRequest) {
   const token = request.cookies.get('auth-token')?.value;
   
   if (!token) {
+    console.log('🔍 No auth token found in cookies');
     return null;
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
-    await connectDB();
+    console.log('🔍 Token decoded successfully for user:', decoded.userId);
+    
+    // Connect to database with timeout
+    await Promise.race([
+      connectDB(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database connection timeout')), 8000)
+      )
+    ]);
+    
     const user = await User.findById(decoded.userId);
+    console.log('🔍 User found:', !!user);
     return user;
   } catch (error) {
+    console.error('❌ getUserFromToken error:', error);
     return null;
   }
 }
